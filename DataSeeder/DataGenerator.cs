@@ -8,9 +8,9 @@ public class DataGenerator
 {
     public static readonly List<Lead> Leads = [];
     public static readonly List<Account> Accounts = [];
-    
-    public const int NumberOfLead = 5;
-    public const int NumberOfAccounts = 3;
+
+    private const int numberOfLeads = 5;
+    private const int numberOfAccountsPerLead = 3;
     
     private static Faker<Account> GetAccountGenerator(Guid leadId)
     {
@@ -28,5 +28,21 @@ public class DataGenerator
             .RuleFor(e => e.Phone, f => f.Phone.PhoneNumber())
             .RuleFor(e => e.Address, f => f.Address.FullAddress())
             .RuleFor(e => e.BirthDate, f => f.Date.BetweenDateOnly(new DateOnly(1950, 1, 1), new DateOnly(2005, 1, 1)));
+    }
+    
+    private static List<Account> GetBogusAccountData(Guid leadId)
+    {
+        var accountGenerator = GetAccountGenerator(leadId);
+        var generatedLeads = accountGenerator.Generate(numberOfAccountsPerLead);
+
+        return generatedLeads;
+    }
+    
+    public static void InitBogusData()
+    {
+        var leadGenerator = GetLeadGenerator();
+        var generatedLeads = leadGenerator.Generate(numberOfLeads);
+        Leads.AddRange(generatedLeads);
+        generatedLeads.ForEach(e => Accounts.AddRange(GetBogusAccountData(e.Id)));
     }
 }
