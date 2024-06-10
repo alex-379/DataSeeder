@@ -28,12 +28,11 @@ public class CrmContext(DbContextOptions<CrmContext> options) : DbContext(option
         return dataSource;
     }
     
-    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.ApplyConfigurationsForEntitiesInContext();
-        modelBuilder.ConfigureEnums();
+        
+        modelBuilder.Entity<Lead>().HasData(DataGenerator.Leads);
+        modelBuilder.Entity<Account>().HasData(DataGenerator.Accounts);
     }
 }

@@ -9,6 +9,5 @@ public static class Program
         
         Console.WriteLine("Single Employee: ");
         Console.WriteLine(DataGenerator.Leads.First());
-        Console.WriteLine();
     }
 }
