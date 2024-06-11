@@ -5,7 +5,7 @@ using Npgsql;
 
 namespace DataSeeder.Database;
 
-public class CrmContext(DbContextOptions<CrmContext> options) : DbContext(options)
+public class CrmContext : DbContext
 {
     public virtual DbSet<Lead> Leads { get; init; } = default;
     public virtual DbSet<Account> Accounts { get; init; } = default;
@@ -26,13 +26,5 @@ public class CrmContext(DbContextOptions<CrmContext> options) : DbContext(option
         var dataSource = dataSourceBuilder.Build();
 
         return dataSource;
-    }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<Lead>().HasData(DataGenerator.Leads);
-        modelBuilder.Entity<Account>().HasData(DataGenerator.Accounts);
     }
 }
