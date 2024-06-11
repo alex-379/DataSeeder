@@ -7,7 +7,8 @@ namespace DataSeeder;
 public class DataGenerator
 {
     public static readonly List<Lead> Leads = [];
-    private const int numberOfLeads = 40000;
+    public static readonly List<Account> Accounts = [];
+    private const int numberOfLeads = 4000000;
     private const int percentRegularLeads = 80;
     private const int percentVipLeads = 20;
     private const int percentAll = 100;
@@ -16,17 +17,9 @@ public class DataGenerator
     private const string lastName = "";
     private const string provider = "crm.ru";
 
-    
-    private static Faker<Account> GetAccountGenerator(Guid leadId, Currency currency)
-    {
-        return new Faker<Account>()
-            .RuleFor(e => e.Id, _ => Guid.NewGuid())
-            .RuleFor(e => e.Currency, _ => currency);
-    }
-    
     private static Faker<Lead> GetLeadGenerator(LeadStatus status)
     {
-        var password = PasswordsService.HashPassword(Environment.GetEnvironmentVariable(passwordLead), Environment.GetEnvironmentVariable(secret));
+        var (hash, salt) = PasswordsService.HashPassword(Environment.GetEnvironmentVariable(passwordLead), Environment.GetEnvironmentVariable(secret));
         var counter = 0;
         
         return new Faker<Lead>()
@@ -37,8 +30,8 @@ public class DataGenerator
             .RuleFor(e => e.Address, f => f.Address.StreetAddress())
             .RuleFor(e => e.BirthDate, f => f.Date.BetweenDateOnly(new DateOnly(1950, 1, 1), new DateOnly(2005, 1, 1)))
             .RuleFor(e => e.Status, _ => status)
-            .RuleFor(e => e.Password, _ => password.hash)
-            .RuleFor(e => e.Salt, _ => password.salt);
+            .RuleFor(e => e.Password, _ => hash)
+            .RuleFor(e => e.Salt, _ => salt);
     }
     
     public static void InitBogusData()
@@ -53,7 +46,9 @@ public class DataGenerator
             {
                 lead.Accounts.AddRange(GeneratedAccountsForVipLead(lead));
             }
+            Accounts.AddRange(lead.Accounts);
         }
+
     }
 
     private static void GeneratedLeads(int numberOfLeadsWithStatus, LeadStatus status = LeadStatus.Regular)
