@@ -1,29 +1,21 @@
 using DataSeeder.Models;
 using Bogus;
-using DataSeeder.Database;
 using DataSeeder.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace DataSeeder;
 
 public class DataGenerator
 {
-    
     public static readonly List<Lead> Leads = [];
-    public static readonly List<Account> Accounts = [];
+    private const int numberOfLeads = 40000;
+    private const int percentRegularLeads = 80;
+    private const int percentVipLeads = 20;
+    private const int percentAll = 100;
+    private const string passwordLead = "Password_ENVIRONMENT";
+    private const string secret = "SecretPassword_ENVIRONMENT";
+    private const string lastName = "";
+    private const string provider = "crm.ru";
 
-    private const int numberOfRegularLeads = 3200000;
-    private const int numberOfVipLeads = 800000;
-    
-    public static List<Lead> GetSeededLeadsFromDb()
-    {
-        using var context = new CrmContext();
-        context.Database.EnsureCreated();
-        var dbLeadsWithAccounts = context.Leads
-            .Include(e => e.Accounts)
-            .ToList();
-        return dbLeadsWithAccounts;
-    }
     
     private static Faker<Account> GetAccountGenerator(Guid leadId, Currency currency)
     {
@@ -34,13 +26,13 @@ public class DataGenerator
     
     private static Faker<Lead> GetLeadGenerator(LeadStatus status)
     {
-        var password = PasswordsService.HashPassword("Password123!", @"$^$%GTRGRTVdsfcdsr3dsadsa%^%#\$tgregf345#$%34534RTferfer32423DFESd23\$232#$%;%%%\$TRGFSFDSdsfsee3r3*^U^HGFHF");
+        var password = PasswordsService.HashPassword(Environment.GetEnvironmentVariable(passwordLead), Environment.GetEnvironmentVariable(secret));
         var counter = 0;
         
         return new Faker<Lead>()
             .RuleFor(e => e.Id, _ => Guid.NewGuid())
             .RuleFor(e => e.Name, f => f.Name.FirstName())
-            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name,lastName:"", "crm.ru",uniqueSuffix:(counter++).ToString()).ToLower())
+            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name, lastName, provider,(counter++).ToString()).ToLower())
             .RuleFor(e => e.Phone, f => f.Phone.PhoneNumberFormat())
             .RuleFor(e => e.Address, f => f.Address.StreetAddress())
             .RuleFor(e => e.BirthDate, f => f.Date.BetweenDateOnly(new DateOnly(1950, 1, 1), new DateOnly(2005, 1, 1)))
@@ -51,8 +43,8 @@ public class DataGenerator
     
     public static void InitBogusData()
     {
-        GeneratedLeads(numberOfRegularLeads);
-        GeneratedLeads(numberOfVipLeads, LeadStatus.Vip);
+        GeneratedLeads(numberOfLeads * percentRegularLeads/percentAll);
+        GeneratedLeads(numberOfLeads * percentVipLeads/percentAll, LeadStatus.Vip);
 
         foreach (var lead in Leads)
         {
@@ -64,10 +56,10 @@ public class DataGenerator
         }
     }
 
-    private static void GeneratedLeads(int numberOfLeads, LeadStatus status = LeadStatus.Regular)
+    private static void GeneratedLeads(int numberOfLeadsWithStatus, LeadStatus status = LeadStatus.Regular)
     {
         var leadGenerator = GetLeadGenerator(status);
-        var generatedLeads = leadGenerator.Generate(numberOfLeads);
+        var generatedLeads = leadGenerator.Generate(numberOfLeadsWithStatus);
         Leads.AddRange(generatedLeads);
     }
 

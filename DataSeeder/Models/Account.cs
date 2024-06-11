@@ -12,6 +12,6 @@ public class Account
     
     public override string ToString()
     {
-        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+        return JsonSerializer.Serialize(this, JsonSerializerOptionsProvider.GetJsonSerializerOptions());
     }
 }

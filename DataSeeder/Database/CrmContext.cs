@@ -7,6 +7,7 @@ namespace DataSeeder.Database;
 
 public class CrmContext : DbContext
 {
+    private const string database = "CrmLocalDb_ENVIRONMENT";
     public virtual DbSet<Lead> Leads { get; init; } = default;
     public virtual DbSet<Account> Accounts { get; init; } = default;
     
@@ -19,7 +20,7 @@ public class CrmContext : DbContext
 
     private static NpgsqlDataSource ConfigureDataSource()
     {
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(Environment.GetEnvironmentVariable("CrmLocalDb_ENVIRONMENT"));
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(Environment.GetEnvironmentVariable(database));
         dataSourceBuilder.MapEnum<AccountStatus>();
         dataSourceBuilder.MapEnum<Currency>();
         dataSourceBuilder.MapEnum<LeadStatus>();
