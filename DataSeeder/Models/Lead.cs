@@ -17,7 +17,7 @@ public class Lead
     public string RefreshToken { get; init; }
     public DateTime RefreshTokenExpiryTime { get; init; }
     public bool IsDeleted { get; init; }
-    public List<Account> Accounts { get; init; }
+    public List<Account> Accounts { get; set; }
     
     public override string ToString()
     {

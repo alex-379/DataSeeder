@@ -12,9 +12,8 @@ public class DataGenerator
     public static readonly List<Lead> Leads = [];
     public static readonly List<Account> Accounts = [];
 
-    private const int numberOfRegularLeads = 10;
-    private const int numberOfVipLeads = 2;
-    private const int numberOfAccountsPerLead = 3;
+    private const int numberOfRegularLeads = 3200000;
+    private const int numberOfVipLeads = 800000;
     
     public static List<Lead> GetSeededLeadsFromDb()
     {
@@ -26,35 +25,28 @@ public class DataGenerator
         return dbLeadsWithAccounts;
     }
     
-    private static Faker<Account> GetAccountGenerator(Guid leadId)
+    private static Faker<Account> GetAccountGenerator(Guid leadId, Currency currency)
     {
         return new Faker<Account>()
             .RuleFor(e => e.Id, _ => Guid.NewGuid())
-            .RuleFor(e => e.Currency, f => f.PickRandom<Currency>());
+            .RuleFor(e => e.Currency, _ => currency);
     }
     
     private static Faker<Lead> GetLeadGenerator(LeadStatus status)
     {
         var password = PasswordsService.HashPassword("Password123!", @"$^$%GTRGRTVdsfcdsr3dsadsa%^%#\$tgregf345#$%34534RTferfer32423DFESd23\$232#$%;%%%\$TRGFSFDSdsfsee3r3*^U^HGFHF");
+        var counter = 0;
         
         return new Faker<Lead>()
             .RuleFor(e => e.Id, _ => Guid.NewGuid())
             .RuleFor(e => e.Name, f => f.Name.FirstName())
-            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name).ToLower())
-            .RuleFor(e => e.Phone, f => f.Phone.PhoneNumber())
-            .RuleFor(e => e.Address, f => f.Address.FullAddress())
+            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name,lastName:"", "crm.ru",uniqueSuffix:(counter++).ToString()).ToLower())
+            .RuleFor(e => e.Phone, f => f.Phone.PhoneNumberFormat())
+            .RuleFor(e => e.Address, f => f.Address.StreetAddress())
             .RuleFor(e => e.BirthDate, f => f.Date.BetweenDateOnly(new DateOnly(1950, 1, 1), new DateOnly(2005, 1, 1)))
             .RuleFor(e => e.Status, _ => status)
             .RuleFor(e => e.Password, _ => password.hash)
             .RuleFor(e => e.Salt, _ => password.salt);
-    }
-    
-    private static List<Account> GetBogusAccountData(Guid leadId)
-    {
-        var accountGenerator = GetAccountGenerator(leadId);
-        var generatedLeads = accountGenerator.Generate(numberOfAccountsPerLead);
-
-        return generatedLeads;
     }
     
     public static void InitBogusData()
@@ -62,7 +54,14 @@ public class DataGenerator
         GeneratedLeads(numberOfRegularLeads);
         GeneratedLeads(numberOfVipLeads, LeadStatus.Vip);
 
-        //generatedLeads.ForEach(e => Accounts.AddRange(GetBogusAccountData(e.Id)));
+        foreach (var lead in Leads)
+        {
+            lead.Accounts = GeneratedAccountsForLead(lead);
+            if (lead.Status == LeadStatus.Vip)
+            {
+                lead.Accounts.AddRange(GeneratedAccountsForVipLead(lead));
+            }
+        }
     }
 
     private static void GeneratedLeads(int numberOfLeads, LeadStatus status = LeadStatus.Regular)
@@ -71,6 +70,80 @@ public class DataGenerator
         var generatedLeads = leadGenerator.Generate(numberOfLeads);
         Leads.AddRange(generatedLeads);
     }
-    
 
+    private static List<Account> GeneratedAccountsForLead(Lead lead)
+    {
+        List<Account> accountsForLead =
+        [
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Rub,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+
+            },
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Usd,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+            },
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Eur,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+            }
+        ];
+
+        return accountsForLead;
+    }
+    
+    private static List<Account> GeneratedAccountsForVipLead(Lead lead)
+    {
+        List<Account> accountsForVipLead =
+        [
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Jpy,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+
+            },
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Cny,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+            },
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Rsd,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+            },
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Bgn,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+            },
+            new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = Currency.Ars,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+            }
+        ];
+
+        return accountsForVipLead;
+    }
 }
