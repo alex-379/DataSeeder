@@ -7,7 +7,7 @@ namespace DataSeeder.Database;
 
 public class CrmContext : DbContext
 {
-    private const string database = "CrmLocalDb_ENVIRONMENT";
+    private const string database = "CrmDb_ENVIRONMENT";
     public virtual DbSet<Lead> Leads { get; init; } = default;
     public virtual DbSet<Account> Accounts { get; init; } = default;
     
