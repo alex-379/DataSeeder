@@ -8,14 +8,21 @@ public class DataGenerator
 {
     public static readonly List<Lead> Leads = [];
     public static readonly List<Account> Accounts = [];
+    private static readonly Random random = new();
     private const int numberOfLeads = 4000000;
     private const int percentRegularLeads = 80;
     private const int percentVipLeads = 20;
     private const int percentAll = 100;
     private const string passwordLead = "Password_ENVIRONMENT";
     private const string secret = "SecretPassword_ENVIRONMENT";
-    private const string lastName = "";
     private const string provider = "crm.ru";
+
+    public static string RandomString(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
 
     private static Faker<Lead> GetLeadGenerator(LeadStatus status)
     {
@@ -25,7 +32,7 @@ public class DataGenerator
         return new Faker<Lead>()
             .RuleFor(e => e.Id, _ => Guid.NewGuid())
             .RuleFor(e => e.Name, f => f.Name.FirstName())
-            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name, lastName, provider,(counter++).ToString()).ToLower())
+            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name, RandomString(4), provider,(counter++).ToString()).ToLower())
             .RuleFor(e => e.Phone, f => f.Phone.PhoneNumberFormat())
             .RuleFor(e => e.Address, f => f.Address.StreetAddress())
             .RuleFor(e => e.BirthDate, f => f.Date.BetweenDateOnly(new DateOnly(1950, 1, 1), new DateOnly(2005, 1, 1)))
