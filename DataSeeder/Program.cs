@@ -15,7 +15,7 @@ public static class Program
         
         DataGenerator.InitBogusData();
         await using var context = new CrmContext();
-        for (int i = 0; i < DataGenerator.Leads.Count; i += batchSize)
+        for (var i = 0; i < DataGenerator.Leads.Count; i += batchSize)
         {
             batches.Add(DataGenerator.Leads.Skip(i).Take(batchSize).ToList());
         }

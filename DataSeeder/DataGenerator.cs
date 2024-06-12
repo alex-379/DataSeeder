@@ -7,8 +7,7 @@ namespace DataSeeder;
 public class DataGenerator
 {
     public static readonly List<Lead> Leads = [];
-    public static readonly List<Account> Accounts = [];
-    private static readonly Random random = new();
+    private static readonly Random _random = new();
     private const int numberOfLeads = 4000000;
     private const int percentRegularLeads = 80;
     private const int percentVipLeads = 20;
@@ -17,11 +16,11 @@ public class DataGenerator
     private const string secret = "SecretPassword_ENVIRONMENT";
     private const string provider = "crm.ru";
 
-    public static string RandomString(int length)
+    private static string RandomString(int length)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
+            .Select(s => s[_random.Next(s.Length)]).ToArray());
     }
 
     private static Faker<Lead> GetLeadGenerator(LeadStatus status)
@@ -53,7 +52,6 @@ public class DataGenerator
             {
                 lead.Accounts.AddRange(GeneratedAccountsForVipLead(lead));
             }
-            Accounts.AddRange(lead.Accounts);
         }
 
     }
