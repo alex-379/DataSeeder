@@ -1,7 +1,6 @@
 ﻿using DataSeeder.Database;
 using DataSeeder.Models;
 using EFCore.BulkExtensions;
-using Microsoft.Extensions.Options;
 
 namespace DataSeeder;
 
@@ -12,7 +11,8 @@ public static class Program
     public static async Task Main()
     {
         List<List<Lead>> batches = [];
-
+        var counter = 0;
+        
         DataGenerator.InitBogusData();
         await using var context = new CrmContext();
         for (int i = 0; i < DataGenerator.Leads.Count; i += batchSize)
@@ -23,7 +23,8 @@ public static class Program
         foreach (var batch in batches)
         {
             await context.BulkInsertAsync(batch, options => options.IncludeGraph = true);
-            Console.WriteLine($"Iteration {batch} on {batchSize} leads");
+            Console.WriteLine($"Iteration {counter} on {batchSize} leads");
+            counter++;
         }
     }
 }

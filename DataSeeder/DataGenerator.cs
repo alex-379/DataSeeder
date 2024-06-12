@@ -32,7 +32,7 @@ public class DataGenerator
         return new Faker<Lead>()
             .RuleFor(e => e.Id, _ => Guid.NewGuid())
             .RuleFor(e => e.Name, f => f.Name.FirstName())
-            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name, RandomString(4), provider,(counter++).ToString()).ToLower())
+            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name, RandomString(2), provider,(counter++).ToString()).ToLower())
             .RuleFor(e => e.Phone, f => f.Phone.PhoneNumberFormat())
             .RuleFor(e => e.Address, f => f.Address.StreetAddress())
             .RuleFor(e => e.BirthDate, f => f.Date.BetweenDateOnly(new DateOnly(1950, 1, 1), new DateOnly(2005, 1, 1)))
