@@ -6,7 +6,7 @@ namespace DataSeeder;
 
 public static class Program
 {
-    private const int batchSize = 1000;
+    private const int batchSize = 500000;
 
     public static async Task Main()
     {
@@ -14,6 +14,7 @@ public static class Program
         var counter = 0;
         
         DataGenerator.InitBogusData();
+        ValidationAccounts.CheckAccounts(DataGenerator.Leads);
         await using var context = new CrmContext();
         for (var i = 0; i < DataGenerator.Leads.Count; i += batchSize)
         {

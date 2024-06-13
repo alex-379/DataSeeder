@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using DataSeeder.Models;
 using Bogus;
 using DataSeeder.Enums;
@@ -6,38 +7,45 @@ namespace DataSeeder;
 
 public class DataGenerator
 {
-    public static readonly List<Lead> Leads = [];
     private static readonly Random _random = new();
+    public static readonly List<Lead> Leads = [];
+    private static readonly Currency[] _allowedCurrenciesForRegularLead = new[] { Currency.Rub, Currency.Usd, Currency.Eur };
+    private static readonly Currency[] _allowedCurrenciesForVipLead = ((Currency[])Enum.GetValues(typeof(Currency)))
+        .Where(c => c != Currency.Unknown)
+        .ToArray();
+
     private const int numberOfLeads = 4000000;
     private const int percentRegularLeads = 80;
     private const int percentVipLeads = 20;
     private const int percentAll = 100;
+    private const int keySize = 64;
     private const string passwordLead = "Password_ENVIRONMENT";
     private const string secret = "SecretPassword_ENVIRONMENT";
     private const string provider = "crm.ru";
+    private const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    private static string RandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length)
+    private static string GenerateRandomString(int length) => new string(Enumerable.Repeat(chars, length)
             .Select(s => s[_random.Next(s.Length)]).ToArray());
-    }
 
+    private static string GenerateRandomHash() => Convert.ToHexString(RandomNumberGenerator.GetBytes(keySize));
+    
     private static Faker<Lead> GetLeadGenerator(LeadStatus status)
     {
-        var (hash, salt) = PasswordsService.HashPassword(Environment.GetEnvironmentVariable(passwordLead), Environment.GetEnvironmentVariable(secret));
         var counter = 0;
+        var randomHash = GenerateRandomHash();
+        var randomSalt = GenerateRandomHash();
+        var lastNameMail = GenerateRandomString(2);
         
         return new Faker<Lead>()
             .RuleFor(e => e.Id, _ => Guid.NewGuid())
             .RuleFor(e => e.Name, f => f.Name.FirstName())
-            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name, RandomString(2), provider,(counter++).ToString()).ToLower())
+            .RuleFor(e => e.Mail, (f, e) => f.Internet.Email(e.Name, lastNameMail, provider,(counter++).ToString()).ToLower())
             .RuleFor(e => e.Phone, f => f.Phone.PhoneNumberFormat())
             .RuleFor(e => e.Address, f => f.Address.StreetAddress())
             .RuleFor(e => e.BirthDate, f => f.Date.BetweenDateOnly(new DateOnly(1950, 1, 1), new DateOnly(2005, 1, 1)))
             .RuleFor(e => e.Status, _ => status)
-            .RuleFor(e => e.Password, _ => hash)
-            .RuleFor(e => e.Salt, _ => salt);
+            .RuleFor(e => e.Password, _ => randomHash)
+            .RuleFor(e => e.Salt, _ => randomSalt);
     }
     
     public static void InitBogusData()
@@ -47,13 +55,10 @@ public class DataGenerator
 
         foreach (var lead in Leads)
         {
-            lead.Accounts = GeneratedAccountsForLead(lead);
-            if (lead.Status == LeadStatus.Vip)
-            {
-                lead.Accounts.AddRange(GeneratedAccountsForVipLead(lead));
-            }
+            lead.Accounts = lead.Status != LeadStatus.Vip
+                ? GeneratedAccountsForLead(lead, _allowedCurrenciesForRegularLead)
+                : GeneratedAccountsForLead(lead, _allowedCurrenciesForVipLead, 1,8);
         }
-
     }
 
     private static void GeneratedLeads(int numberOfLeadsWithStatus, LeadStatus status = LeadStatus.Regular)
@@ -62,80 +67,36 @@ public class DataGenerator
         var generatedLeads = leadGenerator.Generate(numberOfLeadsWithStatus);
         Leads.AddRange(generatedLeads);
     }
-
-    private static List<Account> GeneratedAccountsForLead(Lead lead)
+    
+    private static List<Account> GeneratedAccountsForLead(Lead lead,  Currency[] allowedCurrencies, int minAccounts = 1, int maxAccounts = 3)
     {
-        List<Account> accountsForLead =
-        [
-            new Account()
+        var rnd = new Random();
+        var numAccounts = rnd.Next(minAccounts, maxAccounts + 1);
+        var accountsForLead = new List<Account>();
+        var hasRubAccount = false;
+        for (var i = 0; i < numAccounts; i++)
+        {
+            Currency currency;
+            if (!hasRubAccount)
             {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Rub,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
-
-            },
-            new Account()
-            {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Usd,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
-            },
-            new Account()
-            {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Eur,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
+                currency = Currency.Rub;
+                hasRubAccount = true;
             }
-        ];
+            else
+            {
+                currency = allowedCurrencies[rnd.Next(1, allowedCurrencies.Length)];
+            }
+
+            var account = new Account()
+            {
+                Id = Guid.NewGuid(),
+                Currency = currency,
+                LeadId = lead.Id,
+                Status = AccountStatus.Active
+            };
+            accountsForLead.Add(account);
+        }
 
         return accountsForLead;
-    }
-    
-    private static List<Account> GeneratedAccountsForVipLead(Lead lead)
-    {
-        List<Account> accountsForVipLead =
-        [
-            new Account()
-            {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Jpy,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
-
-            },
-            new Account()
-            {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Cny,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
-            },
-            new Account()
-            {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Rsd,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
-            },
-            new Account()
-            {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Bgn,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
-            },
-            new Account()
-            {
-                Id = Guid.NewGuid(),
-                Currency = Currency.Ars,
-                LeadId = lead.Id,
-                Status = AccountStatus.Active
-            }
-        ];
-
-        return accountsForVipLead;
     }
 }

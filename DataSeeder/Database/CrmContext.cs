@@ -7,7 +7,7 @@ namespace DataSeeder.Database;
 
 public class CrmContext : DbContext
 {
-    private const string database = "CrmDb_ENVIRONMENT";
+    private const string database = "CrmLocalDb_ENVIRONMENT";
     public virtual DbSet<Lead> Leads { get; init; } = default;
     public virtual DbSet<Account> Accounts { get; init; } = default;
     
@@ -27,5 +27,23 @@ public class CrmContext : DbContext
         var dataSource = dataSourceBuilder.Build();
 
         return dataSource;
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Lead>().Property(m => m.Name)
+            .HasMaxLength(100);
+        modelBuilder.Entity<Lead>().Property(m => m.Mail)
+            .HasMaxLength(100);
+        modelBuilder.Entity<Lead>().Property(m => m.Phone)
+            .HasMaxLength(100);
+        modelBuilder.Entity<Lead>().Property(m => m.Address)
+            .HasMaxLength(100);
+        modelBuilder.Entity<Lead>().Property(m => m.Password)
+            .HasMaxLength(100);
+        modelBuilder.Entity<Lead>().Property(m => m.Salt)
+            .HasMaxLength(100);
+        modelBuilder.Entity<Lead>().Property(m => m.RefreshToken)
+            .HasMaxLength(100);
     }
 }

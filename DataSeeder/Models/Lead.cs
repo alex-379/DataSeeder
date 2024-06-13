@@ -1,4 +1,4 @@
-using System.Text.Json;
+using System.ComponentModel.DataAnnotations;
 using DataSeeder.Enums;
 
 namespace DataSeeder.Models;
@@ -18,9 +18,4 @@ public class Lead
     public DateTime RefreshTokenExpiryTime { get; init; }
     public bool IsDeleted { get; init; }
     public List<Account> Accounts { get; set; }
-    
-    public override string ToString()
-    {
-        return JsonSerializer.Serialize(this, JsonSerializerOptionsProvider.GetJsonSerializerOptions());
-    }
 }
