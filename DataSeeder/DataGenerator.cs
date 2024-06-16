@@ -14,7 +14,7 @@ public class DataGenerator
         .Where(c => c != Currency.Unknown)
         .ToArray();
 
-    private const int numberOfLeads = 4000000;
+    private const int numberOfLeads = 400;
     private const int percentRegularLeads = 80;
     private const int percentVipLeads = 20;
     private const int percentAll = 100;
@@ -67,27 +67,41 @@ public class DataGenerator
         var generatedLeads = leadGenerator.Generate(numberOfLeadsWithStatus);
         Leads.AddRange(generatedLeads);
     }
-    
-    private static List<Account> GeneratedAccountsForLead(Lead lead,  Currency[] allowedCurrencies, int minAccounts = 1, int maxAccounts = 3)
+
+    private static List<Account> GeneratedAccountsForLead(Lead lead, Currency[] allowedCurrencies, int minAccounts = 1, int maxAccounts = 3)
     {
         var rnd = new Random();
-        var numAccounts = rnd.Next(minAccounts, maxAccounts + 1);
+        var numAccounts = rnd.Next(minAccounts - 1, maxAccounts);
         var accountsForLead = new List<Account>();
-        var hasRubAccount = false;
-        for (var i = 0; i < numAccounts; i++)
+        var usedCurrencies = new HashSet<Currency>();
+
+        var account = new Account
+        {
+            Id = Guid.NewGuid(),
+            Currency = Currency.Rub,
+            LeadId = lead.Id,
+            Status = AccountStatus.Active
+        };
+        accountsForLead.Add(account);
+        usedCurrencies.Add(Currency.Rub);
+
+        for (var i = 0; i < numAccounts - 1; i++)
         {
             Currency currency;
-            if (!hasRubAccount)
+            if (usedCurrencies.Count < allowedCurrencies.Length)
             {
-                currency = Currency.Rub;
-                hasRubAccount = true;
+                do
+                {
+                    currency = allowedCurrencies[rnd.Next(0, allowedCurrencies.Length)];
+                } while (usedCurrencies.Contains(currency));
+                usedCurrencies.Add(currency);
             }
             else
             {
-                currency = allowedCurrencies[rnd.Next(1, allowedCurrencies.Length)];
+                currency = (Currency)usedCurrencies.ToArray()[rnd.Next(1, usedCurrencies.Count)];
             }
 
-            var account = new Account()
+            account = new Account
             {
                 Id = Guid.NewGuid(),
                 Currency = currency,
@@ -99,4 +113,5 @@ public class DataGenerator
 
         return accountsForLead;
     }
+
 }
