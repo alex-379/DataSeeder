@@ -8,7 +8,7 @@ public static class DataUpdater
     public static List<Account> GeneratedAccountsForLead(Lead lead, Currency[] allowedCurrencies)
     {
         var rnd = new Random();
-        var accounts = new List<Account>(lead.Accounts);
+        var accounts = lead.Accounts;
         var usedCurrencies = new HashSet<Currency>
         {
             Currency.Rub
