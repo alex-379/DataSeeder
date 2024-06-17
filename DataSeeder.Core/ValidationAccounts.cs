@@ -10,19 +10,14 @@ public static class ValidationAccounts
 
     public static bool CheckAccounts(List<Lead> leads)
     {
-        if (CheckCountLeads(leads) && CheckDefaultRubAccount(leads) && CheckLeadsOnDuplicateCurrencies(leads))
-        {
-            return true;
-        }
-
-        return false;
+        return CheckCountLeads(leads) && CheckDefaultRubAccount(leads) && CheckLeadsOnDuplicateCurrencies(leads);
     }
 
     private static bool CheckCountLeads(List<Lead> leads)
     {
         var leadsWithInvalidAccountsCount = leads.Where(l =>
         {
-            int expectedAccountsCount = l.Status == LeadStatus.Vip ? numberAccountsVip : numberAccountsRegular;
+            var expectedAccountsCount = l.Status == LeadStatus.Vip ? numberAccountsVip : numberAccountsRegular;
             return l.Accounts.Count > expectedAccountsCount;
         }).ToList();
 
@@ -66,18 +61,15 @@ public static class ValidationAccounts
             var remainingCurrencies = new List<Currency>();
             var hasDuplicateCurrencies = false;
 
-            foreach (var account in lead.Accounts)
+            foreach (var currency in lead.Accounts.Select(account => account.Currency))
             {
-                var currency = account.Currency;
                 if (remainingCurrencies.Contains(currency))
                 {
                     hasDuplicateCurrencies = true;
                     break;
                 }
-                else
-                {
-                    remainingCurrencies.Add(currency);
-                }
+
+                remainingCurrencies.Add(currency);
             }
 
             if (hasDuplicateCurrencies)
@@ -86,7 +78,7 @@ public static class ValidationAccounts
             }
         }
 
-        if (leadsWithDuplicateCurrencies.Count != 0)
+        if (leadsWithDuplicateCurrencies.Count == 0) return true;
         {
             Console.WriteLine($"Leads with duplicate account currencies of {leadsWithDuplicateCurrencies.Count} pcs were found:");
             foreach (var lead in leadsWithDuplicateCurrencies)
@@ -97,7 +89,5 @@ public static class ValidationAccounts
             return false;
         }
 
-        return true;
     }
-
 }

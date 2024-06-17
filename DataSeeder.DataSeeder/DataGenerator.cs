@@ -5,7 +5,7 @@ using Bogus;
 
 namespace DataSeeder.DataSeeder;
 
-public class DataGenerator
+public static class DataGenerator
 {
     private static readonly Random _random = new();
     public static readonly List<Lead> Leads = [];

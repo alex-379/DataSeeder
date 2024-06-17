@@ -16,7 +16,7 @@ public static class DataUpdater
 
         accounts[0].Currency = Currency.Rub;
 
-        for (int i = 1; i < accounts.Count; i++)
+        for (var i = 1; i < accounts.Count; i++)
         {
             Currency currency;
             if (usedCurrencies.Count < allowedCurrencies.Length)

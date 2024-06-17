@@ -16,13 +16,13 @@ public static class Program
 
     public static async Task Main()
     {
-        var pageSize = 1000;
-        var totalPages = 4000;
+        const int pageSize = 1000;
+        const int totalPages = 4000;
         var counter = 0;
 
         var accounts = new List<Account>();
         await using var context = new CrmContext();
-        for (int pageIndex = 0; pageIndex < totalPages; pageIndex++)
+        for (var pageIndex = 0; pageIndex < totalPages; pageIndex++)
         {
             var leads = await context.Leads
                 .Include(l => l.Accounts)
@@ -44,7 +44,8 @@ public static class Program
             if (!ValidationAccounts.CheckAccounts(leads))
             {
                 throw new ValidationException();
-            };
+            }
+            
             context.Accounts.UpdateRange(accounts);
             await context.SaveChangesAsync();
 
