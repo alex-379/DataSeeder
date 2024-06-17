@@ -1,15 +1,15 @@
 using System.Security.Cryptography;
-using DataSeeder.Models;
+using DataSeeder.Core.Models;
+using DataSeeder.Core.Enums;
 using Bogus;
-using DataSeeder.Enums;
 
-namespace DataSeeder;
+namespace DataSeeder.DataSeeder;
 
 public class DataGenerator
 {
     private static readonly Random _random = new();
     public static readonly List<Lead> Leads = [];
-    private static readonly Currency[] _allowedCurrenciesForRegularLead = new[] { Currency.Rub, Currency.Usd, Currency.Eur };
+    private static readonly Currency[] _allowedCurrenciesForRegularLead = [Currency.Rub, Currency.Usd, Currency.Eur];
     private static readonly Currency[] _allowedCurrenciesForVipLead = ((Currency[])Enum.GetValues(typeof(Currency)))
         .Where(c => c != Currency.Unknown)
         .ToArray();
@@ -19,8 +19,6 @@ public class DataGenerator
     private const int percentVipLeads = 20;
     private const int percentAll = 100;
     private const int keySize = 64;
-    private const string passwordLead = "Password_ENVIRONMENT";
-    private const string secret = "SecretPassword_ENVIRONMENT";
     private const string provider = "crm.ru";
     private const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -93,7 +91,8 @@ public class DataGenerator
                 do
                 {
                     currency = allowedCurrencies[rnd.Next(0, allowedCurrencies.Length)];
-                } while (usedCurrencies.Contains(currency));
+                } 
+                while (usedCurrencies.Contains(currency));
                 usedCurrencies.Add(currency);
             }
             else

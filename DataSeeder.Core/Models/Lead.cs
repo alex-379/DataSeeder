@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using DataSeeder.Enums;
+using DataSeeder.Core.Enums;
 
-namespace DataSeeder.Models;
+namespace DataSeeder.Core.Models;
 
 public class Lead
 {

@@ -1,4 +1,4 @@
-﻿namespace DataSeeder.Enums;
+﻿namespace DataSeeder.Core.Enums;
 
 public enum Currency
 {

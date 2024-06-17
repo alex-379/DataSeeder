@@ -1,8 +1,10 @@
-﻿using DataSeeder.Database;
-using DataSeeder.Models;
+﻿using DataSeeder.Core;
+using DataSeeder.Core.Database;
+using DataSeeder.Core.Exceptions;
+using DataSeeder.Core.Models;
 using EFCore.BulkExtensions;
 
-namespace DataSeeder;
+namespace DataSeeder.DataSeeder;
 
 public static class Program
 {
@@ -10,11 +12,19 @@ public static class Program
 
     public static async Task Main()
     {
+        DataGenerator.InitBogusData();
+        if (!ValidationAccounts.CheckAccounts(DataGenerator.Leads))
+        {
+            throw new ValidationException();
+        };
+
+        await AddBatches();
+    }
+
+    private static async Task AddBatches()
+    {
         List<List<Lead>> batches = [];
         var counter = 0;
-        
-        DataGenerator.InitBogusData();
-        ValidationAccounts.CheckAccounts(DataGenerator.Leads);
         await using var context = new CrmContext();
         for (var i = 0; i < DataGenerator.Leads.Count; i += batchSize)
         {

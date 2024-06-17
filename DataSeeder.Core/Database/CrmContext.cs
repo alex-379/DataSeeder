@@ -1,9 +1,9 @@
-﻿using DataSeeder.Enums;
-using DataSeeder.Models;
+﻿using DataSeeder.Core.Enums;
+using DataSeeder.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-namespace DataSeeder.Database;
+namespace DataSeeder.Core.Database;
 
 public class CrmContext : DbContext
 {
