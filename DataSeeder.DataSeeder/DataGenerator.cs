@@ -97,7 +97,7 @@ public static class DataGenerator
             }
             else
             {
-                currency = (Currency)usedCurrencies.ToArray()[rnd.Next(1, usedCurrencies.Count)];
+                currency = usedCurrencies.ToArray()[rnd.Next(1, usedCurrencies.Count)];
             }
 
             account = new Account
