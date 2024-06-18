@@ -5,17 +5,24 @@ namespace DataSeeder.DataUpdater;
 
 public static class DataUpdater
 {
-    public static List<Account> GeneratedAccountsForLead(Lead lead, Currency[] allowedCurrencies)
+
+    public static List<Account> UpdateAccountsForLead(Lead lead, Currency[] allowedCurrencies)
     {
         var rnd = new Random();
-        var accounts = lead.Accounts
-                       ?? [new Account
+        var accounts = lead.Accounts;
+        if (accounts.Count == 0)
+        {
+            accounts =
+            [ new Account
                        {
                            Id = Guid.NewGuid(),
                            Currency = Currency.Rub,
                            LeadId = lead.Id,
                            Status = AccountStatus.Active
-                       }];
+                       }
+            ];
+        }
+
         var usedCurrencies = new HashSet<Currency>
         {
             Currency.Rub

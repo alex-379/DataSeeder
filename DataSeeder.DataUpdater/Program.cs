@@ -16,8 +16,8 @@ public static class Program
 
     public static async Task Main()
     {
-        const int pageSize = 1000;
-        const int totalPages = 4000;
+        const int pageSize = 100000;
+        const int totalPages = 40;
         var counter = 0;
 
         var accounts = new List<Account>();
@@ -34,9 +34,22 @@ public static class Program
             {
                 foreach (var lead in leads)
                 {
+                    if (lead.Accounts.Count == 0)
+                    {
+                        var account = new Account
+                        {
+                            Id = Guid.NewGuid(),
+                            Currency = Currency.Rub,
+                            LeadId = lead.Id,
+                            Status = AccountStatus.Active
+                        };
+                        context.Accounts.Add(account);
+                        await context.SaveChangesAsync();
+                    }
+
                     lead.Accounts = lead.Status != LeadStatus.Vip
-                        ? DataUpdater.GeneratedAccountsForLead(lead, _allowedCurrenciesForRegularLead)
-                        : DataUpdater.GeneratedAccountsForLead(lead, _allowedCurrenciesForVipLead);
+                        ? DataUpdater.UpdateAccountsForLead(lead, _allowedCurrenciesForRegularLead)
+                        : DataUpdater.UpdateAccountsForLead(lead, _allowedCurrenciesForVipLead);
                     accounts.AddRange(lead.Accounts);
                 }
             }
