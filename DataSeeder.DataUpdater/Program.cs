@@ -19,13 +19,11 @@ public static class Program
 
     public static async Task Main()
     {
-        var counter = 0;
-
         var accounts = new List<Account>();
         await using var context = new CrmContext();
-        await CrmContext.ExecuteWithRetryAsync(async (cancellationToken) =>
+        for (var pageIndex = 0; pageIndex < totalPages; pageIndex++)
         {
-            for (var pageIndex = 0; pageIndex < totalPages; pageIndex++)
+            await CrmContext.ExecuteWithRetryAsync(async (cancellationToken) =>
             {
                 var leads = await context.Leads
                     .Include(l => l.Accounts)
@@ -66,9 +64,8 @@ public static class Program
                 await context.SaveChangesAsync(cancellationToken);
 
                 accounts.Clear();
-                Console.WriteLine($"Iteration {counter} on {pageSize} leads");
-                counter++;
-            }
-        });
+                Console.WriteLine($"Iteration {pageIndex+1} on {pageSize} leads");
+            });
+        }
     }
 }

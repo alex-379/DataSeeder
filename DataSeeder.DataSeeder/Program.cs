@@ -18,10 +18,7 @@ public static class Program
             throw new ValidationException();
         };
         
-        await CrmContext.ExecuteWithRetryAsync(async (_) =>
-        {
-            await AddBatches();
-        });
+        await AddBatches();
     }
 
     private static async Task AddBatches()
@@ -36,7 +33,10 @@ public static class Program
 
         foreach (var batch in batches)
         {
-            await context.BulkInsertAsync(batch, options => options.IncludeGraph = true);
+            await CrmContext.ExecuteWithRetryAsync(async (cancellationToken) =>
+            {
+                await context.BulkInsertAsync(batch, options => options.IncludeGraph = true, cancellationToken: cancellationToken);
+            });
             Console.WriteLine($"Iteration {counter} on {batchSize} leads");
             counter++;
         }
