@@ -50,8 +50,8 @@ namespace DataSeeder.Core.Database
 
         public static async Task ExecuteWithRetryAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default)
         {
-            int retryCount = 0;
-            const int maxRetryCount = 5;
+            var retryCount = 0;
+            const int maxRetryCount = 50000;
             const int initialRetryDelay = 500;
 
             while (retryCount < maxRetryCount)
@@ -64,7 +64,7 @@ namespace DataSeeder.Core.Database
                 catch (Exception)
                 {
                     retryCount++;
-                    int retryDelay = (int)Math.Pow(2, retryCount - 1) * initialRetryDelay;
+                    var retryDelay = (int)Math.Pow(2, retryCount - 1) * initialRetryDelay;
 
                     Console.WriteLine($"Database connection error. Retry #{retryCount} after {retryDelay} ms.");
                     await Task.Delay(retryDelay, cancellationToken);

@@ -23,7 +23,6 @@ public static class Program
 
         var accounts = new List<Account>();
         await using var context = new CrmContext();
-        var testLead = await context.Leads.Include(l => l.Accounts).FirstOrDefaultAsync();
         await CrmContext.ExecuteWithRetryAsync(async (cancellationToken) =>
         {
             for (var pageIndex = 0; pageIndex < totalPages; pageIndex++)
@@ -71,8 +70,5 @@ public static class Program
                 counter++;
             }
         });
-
-
-        
     }
 }

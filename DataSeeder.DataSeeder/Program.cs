@@ -17,8 +17,11 @@ public static class Program
         {
             throw new ValidationException();
         };
-
-        await AddBatches();
+        
+        await CrmContext.ExecuteWithRetryAsync(async (_) =>
+        {
+            await AddBatches();
+        });
     }
 
     private static async Task AddBatches()
