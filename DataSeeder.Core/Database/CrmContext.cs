@@ -52,7 +52,7 @@ namespace DataSeeder.Core.Database
         {
             var retryCount = 0;
             const int maxRetryCount = 50000;
-            const int initialRetryDelay = 500;
+            const int retryDelay = 5000;
 
             while (retryCount < maxRetryCount)
             {
@@ -64,8 +64,6 @@ namespace DataSeeder.Core.Database
                 catch (Exception)
                 {
                     retryCount++;
-                    var retryDelay = (int)Math.Pow(2, retryCount - 1) * initialRetryDelay;
-
                     Console.WriteLine($"Database connection error. Retry #{retryCount} after {retryDelay} ms.");
                     await Task.Delay(retryDelay, cancellationToken);
                 }
